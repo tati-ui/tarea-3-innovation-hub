@@ -183,3 +183,25 @@ ORDER BY SolicitudId;
 -- Este usuario no existe en los datos de prueba.
 --
 -- Resultado
+-- Se espera el error 547 por una clave foránea inexistente.
+
+BEGIN TRY
+    BEGIN TRANSACTION;
+
+    INSERT INTO Solicitudes (IniciativaId, UsuarioId, Estado)
+    VALUES (1, 999999, 'pendiente');
+
+    ROLLBACK TRANSACTION;
+END TRY
+BEGIN CATCH
+    IF @@TRANCOUNT > 0
+        ROLLBACK TRANSACTION;
+
+    SELECT
+        ERROR_NUMBER() AS NumeroError,
+        ERROR_MESSAGE() AS MensajeError;
+END CATCH;
+
+-- RESULTADO ESPERADO:
+-- Error 547: conflicto con la clave foránea.
+-- No se inserta ninguna solicitud nueva.
